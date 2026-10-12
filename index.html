@@ -435,6 +435,43 @@
     </div>
 
 <script>
+const suffixes = [
+    [63, "vigintillion"],
+    [60, "novemdecillion"],
+    [57, "octodecillion"],
+    [54, "septendecillion"],
+    [51, "sexdecillion"],
+    [48, "quindecillion"],
+    [45, "quattuordecillion"],
+    [42, "tredecillion"],
+    [39, "duodecillion"],
+    [36, "undecillion"],
+    [33, "decillion"],
+    [30, "nonillion"],
+    [27, "octillion"],
+    [24, "septillion"],
+    [21, "sextillion"],
+    [18, "quintillion"],
+    [15, "quadrillion"],
+    [12, "trillion"],
+    [9, "billion"],
+    [6, "million"],
+    [3, "K"]
+];
+
+function toNumberNotationWithWords(input) {
+    let number = Number(input)
+    if (isNaN(number)) return input
+    for (let [power, suffix] of suffixes) {
+        if (number >= Math.pow(10, power)) {
+            let result = number / Math.pow(10, power);
+            return result.toFixed(2) + " " + suffix
+        }
+    }
+    
+    return number
+}
+
     if (typeof player_xp === 'undefined') window.player_xp = 0;
     if (typeof player_level === 'undefined') window.player_level = 1;
     if (typeof claimed_rewards === 'undefined' || !claimed_rewards) window.claimed_rewards = [];
@@ -443,7 +480,7 @@
     function updateMoneyDisplay() {
     let moneyEl = document.getElementById("money-display");
     if (moneyEl && typeof number !== 'undefined') {
-        moneyEl.innerText = "Balance: \$" + number.toFixed(2);
+        moneyEl.innerText = "Balance: \$" + toNumberNotationWithWords(number.toFixed(2));
     }
 }
 
@@ -1019,22 +1056,22 @@ function executeCheatInjection(type, amount) {
         updateMoneyDisplay();
         triggerMoneyAnimation('win');
         check_achievements('cash', number);
-        if (terminal) terminal.innerHTML += `<span style="color: #10b981;">[CHEAT] +$${amount.toLocaleString()} cash injected.</span>\n`;
+        if (terminal) terminal.innerHTML += `<span style="color: #10b981;">[CHEAT] +$${toNumberNotationWithWords(amount)} cash injected.</span>\n`;
         return `Succes! $${amount.toLocaleString()} added.`;
     } 
     else if (type === 'gold') {
         gold_coins += Math.floor(amount);
         updateGoldDisplay();
-        if (terminal) terminal.innerHTML += `<span style="color: #f59e0b;">[CHEAT] +${Math.floor(amount)} Gold Coins injected.</span>\n`;
+        if (terminal) terminal.innerHTML += `<span style="color: #f59e0b;">[CHEAT] +${toNumberNotationWithWords(Math.floor(amount))} Gold Coins injected.</span>\n`;
         return `Succes! ${Math.floor(amount)} Gold Coins added.`;
     } 
     else if (type === 'multiplier') {
         click_multiplier += amount;
         let ub = document.getElementById("upgrade-btn");
         if(ub && typeof upgrade_cost !== 'undefined') {
-            ub.innerText = `Upgrade Hits (${(click_multiplier * 2).toFixed(1)}x earnings) ($${upgrade_cost.toFixed(2)})`;
+            ub.innerText = `Upgrade Hits (${toNumberNotationWithWords((click_multiplier * 2).toFixed(1))}x earnings) ($${toNumberNotationWithWords(upgrade_cost.toFixed(2))})`;
         }
-        if (terminal) terminal.innerHTML += `<span style="color: #8b5cf6;">[CHEAT] Multiplier upgraded with +${amount}x! (Now: ${click_multiplier}x)</span>\n`;
+        if (terminal) terminal.innerHTML += `<span style="color: #8b5cf6;">[CHEAT] Multiplier upgraded with +${toNumberNotationWithWords(amount)}x! (Now: ${toNumberNotationWithWords(click_multiplier)}x)</span>\n`;
         return `Succes! Multiplier upgraded.`;
     }
     else if (type === 'Egg_upgrade') {
@@ -1154,20 +1191,20 @@ function injectCheat(type) {
         updateMoneyDisplay();
         triggerMoneyAnimation('win');
         check_achievements('cash', number);
-        terminal.innerHTML += `<span style="color: #10b981;">[CHEAT] Injected $${amount.toLocaleString()} into system balance.</span>\n`;
+        terminal.innerHTML += `<span style="color: #10b981;">[CHEAT] Injected $${toNumberNotationWithWords(amount)} into system balance.</span>\n`;
     } 
     else if (type === 'gold') {
         gold_coins += Math.floor(amount); // Gold coins zijn altijd hele getallen
         updateGoldDisplay();
-        terminal.innerHTML += `<span style="color: #f59e0b;">[CHEAT] Injected ${Math.floor(amount)} Gold Coins into inventory.</span>\n`;
+        terminal.innerHTML += `<span style="color: #f59e0b;">[CHEAT] Injected ${toNumberNotationWithWords(Math.floor(amount))} Gold Coins into inventory.</span>\n`;
     } 
     else if (type === 'multiplier') {
         click_multiplier += amount;
-        terminal.innerHTML += `<span style="color: #8b5cf6;">[CHEAT] Added +${amount}x to Hit Multiplier. New multiplier: ${click_multiplier}x!</span>\n`;
+        terminal.innerHTML += `<span style="color: #8b5cf6;">[CHEAT] Added +${toNumberNotationWithWords(amount)}x to Hit Multiplier. New multiplier: ${toNumberNotationWithWords(click_multiplier)}x!</span>\n`;
         
         // Update direct de paarse knoptekst als die al in beeld is
         let ub = document.getElementById("upgrade-btn");
-        if(ub) ub.innerText = `Upgrade Hits (${(click_multiplier * 2).toFixed(1)}x earnings) ($${upgrade_cost.toFixed(2)})`;
+        if(ub) ub.innerText = `Upgrade Hits (${toNumberNotationWithWords((click_multiplier * 2).toFixed(1))}x earnings) ($${toNumberNotationWithWords(upgrade_cost.toFixed(2))})`;
     }
     
     terminal.scrollTop = terminal.scrollHeight;
@@ -1416,10 +1453,6 @@ function triggerMoneyAnimation(status) {
     }
 }
 
-function updateMoneyDisplay() {
-    let el = document.getElementById("money-display");
-    if(el) el.innerText = `Balance: $${number.toFixed(2)}`;
-}
 
 function updateGoldDisplay() {
     let el = document.getElementById("gold-display");
@@ -1562,7 +1595,7 @@ function strikeBack() {
     number -= loss;
     updateMoneyDisplay();
     triggerMoneyAnimation('loss'); 
-    terminal.innerHTML += `\n<span style="color: #ff4d4d; font-weight: bold;">[JOE STRIKES BACK] Joe got mad and hit you back! You lost $${loss.toFixed(2)}!</span>\n\n`;
+    terminal.innerHTML += `\n<span style="color: #ff4d4d; font-weight: bold;">[JOE STRIKES BACK] Joe got mad and hit you back! You lost $${toNumberNotationWithWords(loss.toFixed(2))}!</span>\n\n`;
     terminal.scrollTop = terminal.scrollHeight;
     document.body.classList.add("red")
     setTimeout(resetBackground, 150);
@@ -1829,7 +1862,7 @@ function new_button_click() {
         updateMoneyDisplay();
         triggerMoneyAnimation('win'); 
         
-        terminal.innerHTML += `Your Eggs cash value was worth: $${Egg_value.toFixed(2)}\n`;
+        terminal.innerHTML += `Your Eggs cash value was worth: $${toNumberNotationWithWords(Egg_value.toFixed(2))}\n`;
 
         let current_chance_godly = chance_godly * shop_godly_booster;
         let current_chance_mythic = chance_mythic * shop_mythic_booster;
@@ -1887,10 +1920,10 @@ function new_button_click() {
         check_achievements('album', countUniqueEggs());
         check_achievements('cash', number); 
 
-        terminal.innerHTML += `Your new total balance is: $${number.toFixed(2)}\n\n`;
+        terminal.innerHTML += `Your new total balance is: $${toNumberNotationWithWords(number.toFixed(2))}\n\n`;
         build_rarity_album();
     } else {
-        terminal.innerHTML += `You don't have enough money! Eggs cost $${current_Egg_price.toFixed(2)}\n`;
+        terminal.innerHTML += `You don't have enough money! Eggs cost $${toNumberNotationWithWords(current_Egg_price.toFixed(2))}\n`;
     }
     terminal.scrollTop = terminal.scrollHeight;
 }
@@ -1922,11 +1955,11 @@ function upgrade_button_click() {
         click_multiplier = next_multiplier_step;
         updateMoneyDisplay();
         triggerMoneyAnimation('loss');
-        terminal.innerHTML += `<span style="color: #9c27b0; font-weight: bold;">UPGRADE BOUGHT! Multiplier: ${click_multiplier}x!</span>\n`;
+        terminal.innerHTML += `<span style="color: #9c27b0; font-weight: bold;">UPGRADE BOUGHT! Multiplier: ${toNumberNotationWithWords(click_multiplier)}x!</span>\n`;
         upgrade_cost *= 2.5;
         next_multiplier_step *= 2;
         let ub = document.getElementById("upgrade-btn");
-        if(ub) ub.innerText = `Upgrade Hits (${next_multiplier_step}x earnings) ($${upgrade_cost.toFixed(2)})`;
+        if(ub) ub.innerText = `Upgrade Hits (${toNumberNotationWithWords(next_multiplier_step)}x earnings) ($${toNumberNotationWithWords(upgrade_cost.toFixed(2))})`;
         checkQuestProgression('buy_upgrade', 1);
     } else {
         terminal.innerHTML += `Not enough money!\n`;
@@ -1970,10 +2003,10 @@ function upgrade_Eggs_click() {
             if(pub) pub.innerText = "Eggs Upgraded! (MAX LEVEL)";
         } else {
             terminal.innerHTML += `<span style="color: #00bcd4; font-weight: bold;">Eggs upgraded! The chance on rare Eggs increased!</span>\n\n`;
-            if(pub) pub.innerText = `Upgrade Eggs ($${Egg_upgrade_cost.toFixed(2)})`;
+            if(pub) pub.innerText = `Upgrade Eggs ($${toNumberNotationWithWords(Egg_upgrade_cost.toFixed(2))})`;
         }
         
-        if(sb) sb.innerText = `Buy Alpha-beast Eggs ($${current_Egg_price.toFixed(2)})`;
+        if(sb) sb.innerText = `Buy Alpha-beast Eggs ($${toNumberNotationWithWords(current_Egg_price.toFixed(2))})`;
         
         // Sla direct de voortgang op (als je het opslegsysteem gebruikt)
         if (typeof saveGame === "function") saveGame();
@@ -2141,7 +2174,7 @@ function matrixClickMoney() {
         if (typeof triggerMoneyAnimation === "function") triggerMoneyAnimation('win');
         if (typeof check_achievements === "function") check_achievements('cash', number);
         if (typeof terminal !== 'undefined' && terminal) {
-            terminal.innerHTML += `\n<span style="color: #10b981;">[CHEAT] +$${amt.toLocaleString()} cash injected.</span>\n`;
+            terminal.innerHTML += `\n<span style="color: #10b981;">[CHEAT] +$${toNumberNotationWithWords(amt)} cash injected.</span>\n`;
             terminal.scrollTop = terminal.scrollHeight;
         }
     }
@@ -2159,7 +2192,7 @@ function matrixClickGold() {
         gold_coins += amt;
         if (typeof updateGoldDisplay === "function") updateGoldDisplay();
         if (typeof terminal !== 'undefined' && terminal) {
-            terminal.innerHTML += `\n<span style="color: #f59e0b;">[CHEAT] +${amt.toLocaleString()} Gold Coins injected.</span>\n`;
+            terminal.innerHTML += `\n<span style="color: #f59e0b;">[CHEAT] +${toNumberNotationWithWords(amt)} Gold Coins injected.</span>\n`;
             terminal.scrollTop = terminal.scrollHeight;
         }
     }
@@ -2177,10 +2210,10 @@ function matrixClickMultiplier() {
         click_multiplier += amt;
         let ub = document.getElementById("upgrade-btn");
         if (ub && typeof upgrade_cost !== 'undefined') {
-            ub.innerText = `Upgrade Hits (${(click_multiplier * 2).toFixed(1)}x earnings) ($${upgrade_cost.toFixed(2)})`;
+            ub.innerText = `Upgrade Hits (${toNumberNotationWithWords((click_multiplier * 2).toFixed(1))}x earnings) ($${toNumberNotationWithWords(upgrade_cost.toFixed(2))})`;
         }
         if (typeof terminal !== 'undefined' && terminal) {
-            terminal.innerHTML += `\n<span style="color: #8b5cf6;">[CHEAT] Hit Multiplier boosted by +${amt.toLocaleString()}x!</span>\n`;
+            terminal.innerHTML += `\n<span style="color: #8b5cf6;">[CHEAT] Hit Multiplier boosted by +${toNumberNotationWithWords(amt)}x!</span>\n`;
             terminal.scrollTop = terminal.scrollHeight;
         }
     }
